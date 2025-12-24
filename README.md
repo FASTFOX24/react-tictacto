@@ -1,70 +1,65 @@
-# Getting Started with Create React App
+# 리액트 틱택토 정리
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## `display : flex` 속성
 
-## Available Scripts
+요소는 inline과 block 요소로 나뉜다. 
+inline 요소는 하나의 글자처럼 적용되는 요소이다. 좀 더 쉽게 말하자면 한 줄에 여러개의 요소가 글자처럼 나열될 수 있다는 뜻이다.
+반대로 block 요소는 화면에 보여지기에 요소의 좌,우(상,하)로 공간이 있어도 혼자서 한 라인을 모두 차지한다.
+그렇다면 주제로 돌아가서 display : flex는 무슨 효과를 주는 것일까?
+핵심부터 말하자면 해당 스타일은 자식 요소를 flex 상태, 즉 inline 요소로 바꿔주는 것이다.
+여기서 중요한 것은 `display : flex` 스타일이 적용된 `본인`이 아니라 `자식`이 inline 요소로 변한다는 것이다.
 
-In the project directory, you can run:
+## 반복 렌더링(특정한 배열 데이터가 없는 경우)
 
-### `npm start`
+보통은 `.map()` 함수를 사용하면 되지만 이 경우는 해당 횟수만큼 반복할 배열값이 존재할 떄의 이야기이고 가끔 특정한 개수의 똑같은 UI를 나열하거나 같은 동작을 반복해야 할 때가 있다.
+그렇다면 어떤 방법이 있을까? 가장 원초적으로 하나하나 모두 작성하는 방법? 당연하게도 유지보수와 수량이 너무 많아졌을 때를 고려하면 불가능하다.
+그렇다면 `for`문? 정해진 배열값이 필요하지 않다는 부분에서는 적합하지만 기본적으로 `for`문은 명령형 구조를 가지고 있기 때문에 선언형 구조를 가진다는 리액트의 철학과는 맞지 않는다. 그리고 실제 구조를 만들어야 한다는 점에서 현재의 리액트는 for과 `.map()`등과 속도 차이가 유의미하지 않다.
+그래서 결론적으로 가장 적합한 것은 `Array.from({length:9}).map()`을 사용하는게 `UI 반복용 구조`라는 의도가 가장 명확하기 때문에 이 방법을 선호한다. 
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 반복 렌더링에서 key의 역할
+`.map((_,idx)=>{})` 함수를 사용하면 각 요소에 key 값을 지정해야 한다는 것은 알고 있었다.
+하지만 단순히 콘솔에 뜨는 오류를 제거하기 위해서 `key={"personal” + idx}`와 같이 사용했었다.
+리액트에서 `key`가 어떻게 동작하는지, 언제 idx를 사용해도 되는지에 대해서 알아보자.
+리액트의 반복 렌더링문에서 `key`는 id 속성처럼 단순히 나열된 요소 중 하나를 특정하기 위해 존재하는게 아니다.
+리액트는 변경 사항이 생겼을 때 페이지 전체를 리렌더링 하는게 아니라 특정 요소만 리렌더링 하는데 이때 반복된 렌더링 구조에서 리액트는 `key의 변경 유무`에 따라서 변경사항을 감지한다.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 기존의 항목을 밀어내는 방식의 체크리스트 예시
+만약 체크리스트에 새로운 항목이 추가된다고 가정해보자.
+이때 `idx`를 `key`로 넘겨주게 되면, 새로운 항목이 추가되어도 컴포넌트는 그대로 `idx`에 따라서 `0 -> 1 -> 2 ...`의 구조를 유지할 것이다.
+그렇기 때문에 `key`를 가지고 변경 유무를 판단하는 리액트는 컴포넌트가 변경되었다는 것을 인지하지 못하게 되는 버그가 발생하는 것이다. 
 
-### `npm test`
+반대로 `key`에 고유값, 즉 `id`와 같은 값을 넘겨준다면?
+새로운 항목이 가장 앞에 추가되면 `사과 -> 배 -> 귤` 순서에서 `딸기 -> 사과 -> 배 -> 귤`로 `key`의 변경을 감지하게 된다.
+그리고 변경을 감지한 리액트는 자연스럽게 컴포넌트를 새롭게 렌더링 하게 되는 것이다.
+![alt text](<화면 기록 2025-12-25 오전 2.36.20.gif>)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### idx는 사용 금지?
+그렇다고 idx를 무조건적으로 사용하지 않는건 아니다.
+사용자가 고유 key를 등록하지 않았을 경우 자동으로 idx 값을 부여하고 있고 아래와 같은 경우는 사용해도 괜찮다.
 
-### `npm run build`
+* 순서가 바뀌지 않는 리스트
+* 항목 추가/삭제가 없는 경우
+* state가 없이 순수 출력의 경우 (ex: [월, 화, 수, 목])
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 리액트 배열 데이터 변경
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+리액트에서 state에 등록된 배열의 상태를 바꿀 때는 사본을 만들어서 변경했었지만 그 이유가 뭔지는 몰랐다.
+그 이유에 대해서 설명하자면 리액트를 사용하는 `전제 조건`에 어긋나기 때문이다. 리액트는 `상태(데이터)에 따라서 UI를 변경한다`. 
+즉, 상태가 바뀌어야 UI의 생성, 변경, 삭제가 된다는 의미이다.
+만약 a라는 배열이 [1,2,3]라는 값을 가지고 있을 때 a[1] = 4; 라는 코드를 실행하면 JS적으로는 값이 바뀐다. 하지만 리액트가 이를 제대로 인식하고 렌더링이 제대로 될지는 미지수가 되거나 렌더링은 되지만 로직이 꼬이는 문제가 발생할 수도 있다.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 무한 렌더링 오류(이벤트 등록)
 
-### `npm run eject`
+![alt text](<Pasted Graphic.png>)
+가끔 리액트에서 이벤트를 사용할 때 위와 같은 오류가 발생할 때가 있다. 
+경험상으로 이벤트를 전달하는 과정에서 발생하는 이유라는걸 알고는 있어서 해당 부분을 이리저리 수정해보면서 오류를 수정했는데 그 이유를 알게 되었다.
+리액트는 위에서 말했듯이 `상태(데이터)의 변경에 따라서 UI를 다시 렌더링`한다. 
+위의 오류는 렌더링이 무한적으로 반복되고 있다는 뜻이고, 즉 상태의 변경이 계속해서 발생하는 의미이다.
+ 그게 `onClick={handleClick}`, `onClick={handleClick(“”)}`, `onClick={()=>handleClick(“”)}` 이 세 방식의 차이다. 
+ `handleClick`이 상태를 변경하는 로직을 가지고 있을 때 두 번째 방식을 사용하면 `onClick`에 이벤트를 등록하는 것과 동시에 호출이 되고, 상태가 변하면서 UI가 다시 렌더링 된다.
+그리고 재렌더링이 발생하면 onClick 부분 역시 다시 실행되면서 변경과 렌더링이 무한대로 반복되는 것이다.
+결론은 리액트는 `상태 변하면 자동으로 UI를 업데이트 한다` 라는 것이다. 
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 리액트 이벤트 네이밍 규칙
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+리액트에서 onSomething에 이벤트를 넘길 때는 handleSomething이라는 네이밍 규칙을 보편적으로 사용한다.
