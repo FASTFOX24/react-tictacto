@@ -1,0 +1,29 @@
+.square {
+  background-color: white;
+  border: 1px solid #999;
+  width: 34px;
+  height: 34px;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 0;
+  text-align: center;
+  margin-top: -1px; /*격자칸이 3*3이 됐을 때 접선 부분의 border가 2px이 되는 것을 방지한다.*/
+  margin-right: -1px; /*격자칸이 3*3이 됐을 때 접선 부분의 border가 2px이 되는 것을 방지한다.*/
+}
+
+.board-row {
+  display: flex;
+}
+
+.game {
+  display: flex;
+}
+
+.game-board {
+}
+
+.game-info {
+}
+
+.status {
+}

@@ -1,24 +1,43 @@
-import logo from './logo.svg';
-import './App.css';
+import Square from "./components/Square";
+import { calculateWinner } from "./utils/winner-calculate";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+function App({ xIsNext, currentSquares, onPlay }) {
+  const handleClick = (i) => {
+    if (currentSquares[i] || calculateWinner(currentSquares)) return;
+    const nextSquares = currentSquares.slice();
+    if (xIsNext) {
+      nextSquares[i] = "X";
+    } else {
+      nextSquares[i] = "O";
+    }
+    onPlay(nextSquares);
+  };
+
+  const winner = calculateWinner(currentSquares);
+  let status;
+  if (winner) {
+    status = "Winner: " + winner;
+  } else {
+    status = "Next player: " + (xIsNext ? "X" : "O");
+  }
+
+  const squares = Array.from({ length: 3 }).map((_, idx_1) => (
+    <div key={idx_1} className="board-row">
+      {Array.from({ length: 3 }).map((_, idx_2) => (
+        <Square
+          key={idx_1 * 3 + idx_2}
+          value={currentSquares[idx_1 * 3 + idx_2]}
+          onSquareClick={() => handleClick(idx_1 * 3 + idx_2)}
+        />
+      ))}
     </div>
+  ));
+
+  return (
+    <>
+      <div className="status">{status}</div>
+      {squares}
+    </>
   );
 }
 
